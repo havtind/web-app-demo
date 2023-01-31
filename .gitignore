@@ -1,3 +1,5 @@
 myvenv
 .DS_Store
 .gcloudignore
+plan.txt
+__pycache__/

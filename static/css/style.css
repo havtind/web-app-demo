@@ -1,0 +1,110 @@
+body {
+    background-color: rgb(36, 53, 88);
+    color: rgb(255, 255, 255);
+    font-family: Helvetica;
+}
+
+#hoveddel {
+    padding: 20px;
+
+}
+
+h1 {
+    color: rgb(189, 190, 217);
+    text-align: left;
+    font-family: Gill Sans;
+}
+
+table{
+    width: 100%;
+}
+
+th {
+    background-color: rgb(22, 36, 63);
+    text-align: left;
+}
+tr {
+    text-align: left;
+}
+
+td {
+    background-color: rgb(193, 203, 222);
+    color:rgb(41, 41, 48)
+}
+
+time {
+    display:block;
+    cursor:pointer;
+    position:relative;
+    width:300px;
+    height:300px;
+    margin:30px auto;
+    border-radius:50%;
+    background:whitesmoke;
+    border:10px solid #999;
+    box-shadow:
+      inset 1px 2px #888,
+      inset 2px 4px #888,
+      1px 2px #888,
+      2px 4px #888,
+      3px 6px #888,
+      4px 8px #888,
+      5px 10px #888,
+      6px 12px #888,
+      7px 14px #888,
+      -10px -5px #c5c5c5;
+  }
+  
+  .hand { position:absolute; opacity:0; transition:opacity .2s; }
+  
+  .tick-container { position:absolute; left:145px; top:15px; }
+  .tick { width:10px; height:270px; transform-origin:center center; transform:rotate(30deg); }
+  
+  .tick:before, .tick:after { position:absolute; display:block; content:""; width:10px; height:25px; background:#222; }
+  .tick:after { bottom:0; }
+  
+  
+  #minute {
+    width:12px;
+    height:160px;
+    top:15px;
+    background:rgba(20,20,20,0.9);
+    left:144px;
+    transform-origin:center 135px;
+  }
+  
+  #hour {
+    width:16px;
+    height:132px;
+    top:50px;
+    background:rgba(20,20,20,0.9);
+    left:142px;
+    transform-origin:center 100px;
+  }
+  
+  #second {
+    width:4px;
+    height:155px;
+    top:30px;
+    background:rgb(255,70,70);
+    left:149px;
+    transform-origin:center 120px;
+    animation:seconds 60s linear infinite;
+  }
+  
+  @keyframes seconds {
+    0%{ transform:rotate(0); }
+    97.5%,100%{ transform:rotate(1turn); }
+  }
+  
+  #second:after {
+    content:"";
+    background:rgb(255,70,70);
+    display:block;
+     width:20px;
+    height:20px;
+    border-radius:50%;
+    position:absolute;
+    left:-8px;
+  }
+  
