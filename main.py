@@ -5,9 +5,10 @@ from flask import jsonify
 import json
 import random
 import xml.etree.ElementTree as ET
-from api_testing import pretty_print_xml
+
 from urllib.request import urlopen
 from datetime import datetime
+
 
 app = Flask(__name__)
 
@@ -29,41 +30,53 @@ def get_api_str(interval:int, line:str=None, direction:str=None, freighttrain:bo
     return api_str
 
 
-def get_train_table():
+def get_train_table(interval, line):
+    if line=='':
+        line = None
     base_url_et = 'https://siri.opm.jbv.no/jbv/et/EstimatedTimetable.xml?'
-    api_str = get_api_str(interval=10, line=None, direction=None, freighttrain=False)
+    api_str = get_api_str(interval=interval, line=line, direction=None, freighttrain=False)
 
     def get_api_xml_str(urlstr):
         try:
-            with urlopen(base_url_et+urlstr) as response:
+            with urlopen(urlstr) as response:
+                """
+                def get_kpi():
+                url = "https://api.themoviedb.org/3/discover/movie?api_key={}"
+                response = urllib.request.urlopen(url)
+                data = response.read()
+                dict = json.loads(data)
+                return render_template ("movies.html", movies=dict["results"])
+                """
                 body = response.read()
             return body.decode("utf-8")
         except ValueError:
             return 'Not able to make api call'
 
     print(base_url_et+api_str)
-    xml_str = get_api_xml_str(api_str)
+    url_str = base_url_et+api_str
+    xml_str = get_api_xml_str(url_str)
     root = ET.fromstring(xml_str)
-
 
     #folder='test_data/'
     #tree = ET.parse(folder+'et_0606_error.xml')
     #root = tree.getroot() 
     
-    traindata = parse_xml_tree(root)
+    traindata = parse_xml_tree(root, url_str)
     return traindata
 
 
 @app.route('/update', methods=['POST', 'GET'])
 def update_func():
-    #jsonString = json.dumps(list_of_train_dict2, indent=4)
-    jsonString = json.dumps(get_train_table(), indent=4)
+    # celsius = request.args.get("celsius", "")
+    line = request.args.get('line')
+    interval = request.args.get('interval')
+    jsonString = json.dumps(get_train_table(interval, line), indent=4)
     return jsonString
 
 
 
 
-def parse_xml_tree(root: ET.Element):
+def parse_xml_tree(root: ET.Element, api_str:str):
     # tidspunkt hentet ut, 
     #'Nr', 'Linje', 'Fra', 'Til', 'Med', 'Forrige stasjon', 'Kl', 'Neste stasjon', 'Kl', 'Forsinkelse', 'Merknad']
     # ingen godstog
@@ -134,7 +147,7 @@ def parse_xml_tree(root: ET.Element):
                     rec_departure = lastRecordedCall.findtext(name_spc+'ActualDepartureTime')
                     aim_departure = to_datetime(lastRecordedCall.findtext(name_spc+'AimedDepartureTime'))
                     aim_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'AimedArrivalTime'))
-                    exp_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime'))
+                    #exp_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime'))
                     time_interval = get_time_difference(current_time, aim_arrival)
                     last_stop = lastRecordedCall.findtext(name_spc+'StopPointName')
                     next_stop = firstEstimatedCall.findtext(name_spc+'StopPointName')
@@ -144,14 +157,14 @@ def parse_xml_tree(root: ET.Element):
                         rec_departure = to_datetime(rec_departure)
                         departure = rec_departure.strftime("%H:%M")
                     arrival = aim_arrival.strftime("%H:%M")
-                    delay = get_time_difference(aim_arrival, exp_arrival)
+                    delay = get_time_difference(aim_arrival, aim_arrival)
                 else:
                     # Middle of journey.
                     status = firstEstimatedCall.findtext(name_spc+'DepartureStatus')
                     remark = ''
                     rec_departure = lastRecordedCall.findtext(name_spc+'ActualDepartureTime')
                     aim_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'AimedArrivalTime'))
-                    exp_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime'))
+                    #exp_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime'))
                     aim_departure = to_datetime(lastRecordedCall.findtext(name_spc+'AimedDepartureTime'))
                     time_interval = get_time_difference(current_time, aim_arrival)
                     last_stop = lastRecordedCall.findtext(name_spc+'StopPointName')
@@ -162,7 +175,7 @@ def parse_xml_tree(root: ET.Element):
                         rec_departure = to_datetime(rec_departure)
                         departure = rec_departure.strftime("%H:%M")
                     arrival = aim_arrival.strftime("%H:%M")
-                    delay = get_time_difference(aim_arrival, exp_arrival)
+                    delay = get_time_difference(aim_arrival, aim_arrival)
                 if cancelled:
                     remark = 'Kansellert videre'
                
@@ -185,12 +198,18 @@ def parse_xml_tree(root: ET.Element):
                 }
             journey_count += 1
             all_journeys.append(single_journey)
-    all_journeys.append({'journeys':journey_count-1, 'delays':delay_count})
+    if journey_count == 1:
+        single_journey = {
+                'Nr': '-', 'Linje': '-', 'Fra': '-', 'Til': '-', 
+                'Med': '-', 'Forrige stasjon':'-', 'Utsjekket': '-', 'Neste stasjon':'-', 
+                'Oppsatt': '-', 'Forsinkelse': '-', 'Merknad': 'Ingen oppsatte tog!'
+                }
+        all_journeys.append(single_journey)
+    all_journeys.append({'journeys':journey_count-1, 'delays': delay_count, 'api_str': api_str})
     return all_journeys
 
 def to_datetime(time_str):
     return datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S+01:00")
-
 
 def get_time_difference(date1:datetime, date2:datetime):
     timedelta = max([date1, date2]) - min([date1, date2])
@@ -202,70 +221,5 @@ def get_time_difference(date1:datetime, date2:datetime):
     return minutes
 
 
-
-def get_time(timestamp: str):
-    if timestamp:
-        #2023-01-29T05:32:00+01:00
-        timestamp = timestamp.removesuffix('+01:00')
-        [date, time] = timestamp.split('T')
-        [time, _] = time.rsplit(sep=':', maxsplit=1)
-        return time
-    else:
-        return False
-
-def get_time_difference2(time1:str, time2:str):
-    # time1 < time2
-    time1 = time1.split(':')
-    time2 = time2.split(':')
-    time1 = [int(i) for i in time1]
-    time2 = [int(i) for i in time2]
-    delay = 60*(time2[0]-time1[0]) + (time2[1]-time1[1])
-    return delay
-
-
-
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=8080, debug=True)
-  
-
-
-
-
-
-
-
-"""
-@app.route("/1")
-def converter():
-    celsius = request.args.get("celsius", "")
-    if celsius:
-        fahrenheit = fahrenheit_from(celsius)
-    else:
-        fahrenheit = ""
-    return (
-        <form action="" method="get">
-                <input type="text" name="celsius">
-                <input type="submit" value="Convert">
-              </form>
-                + "Fahrenheit: "
-                + fahrenheit
-            )
-
-@app.route("/2")
-def get_kpi():
-    url = "https://api.themoviedb.org/3/discover/movie?api_key={}"
-    response = urllib.request.urlopen(url)
-    data = response.read()
-    dict = json.loads(data)
-    return render_template ("movies.html", movies=dict["results"])
-
-def fahrenheit_from(celsius):
-    #Convert Celsius to Fahrenheit degrees.
-    try:
-        fahrenheit = float(celsius) * 9 / 5 + 32
-        fahrenheit = round(fahrenheit, 3)  # Round to three decimal places
-        return str(fahrenheit)
-    except ValueError:
-        return "invalid input"
-
-"""

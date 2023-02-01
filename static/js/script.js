@@ -24,24 +24,25 @@ $(document).ready(function(){
         }
     }
 
-    function update_table() {
+    function update_table(interval_value) {
         $.ajax({
             url: '/update',
             type: 'get',
+            data: {
+              interval: interval_value,
+              line: $('#line').val()
+            },
             success: function(res){
                 var num_rows = document.querySelector("#test_table").rows.length
                 if (num_rows > 0) {
                     $("#test_table thead").remove(); 
                     $("#test_table tbody").remove(); 
                 }
-           
                 response = JSON.parse(res)
                 let table = document.querySelector("#test_table");
                 let data = Object.keys(response[0]);
-
                 let table_data = response.slice(0,-1)
                 let stats = response.slice(-1)
-
                 update_stats(stats)           
                 generateTable(table, table_data);
                 generateTableHead(table, data);
@@ -52,10 +53,17 @@ $(document).ready(function(){
     function update_stats(stats) {
         document.getElementById('trains').innerHTML = stats[0].journeys
         document.getElementById('delays').innerHTML = stats[0].delays
+        document.getElementById('api_str').innerHTML = stats[0].api_str
+        console.log(stats[0].api_str)
     }
 
     $('#updateButton').click(function(){
-        update_table()
+        console.log('Dette er en test')
+        var interval = 30
+        if (!($('#interval').val()=='')) {
+          interval = $('#interval').val()
+        }
+        update_table(interval)
         var today = new Date();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         document.getElementById('demo').innerHTML = time

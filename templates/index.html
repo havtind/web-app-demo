@@ -7,6 +7,10 @@
 
   <h1>Togstatus i Norge</h1>
 
+  <br>
+  <input type="button" id="updateButton" value="Oppdater tabell">
+  <br>
+   
   
   Sist oppdatert : <span id='demo'> - </span>
   <!--
@@ -21,10 +25,30 @@
    <br>
    Antall forsinkede tog: <span id='delays'> - </span>
    <br>
+
+   <div>
+   søkestreng: <span id='api_str'> placeholder </span>
+  </div>
    <br>
-  <input type="button" id="updateButton" value="Oppdater tabell">
+   Spesifiser søk om ønskelig
+   <br>
+   Linje (default alle linjer):
+   <br>
+   <input type="text" id="line"  size="10">
+   <br>
+   <br>
+   Tidshorisont i minutter (default 30 min):
+   <br>
+   <input type="text" id="interval" size="10">
+   <br>
+   <br>
+   <br>
+   
+  
   <br>
-  <br>
+
+
+
   <time>
     <div class="tick-container">
       <div class="tick">
