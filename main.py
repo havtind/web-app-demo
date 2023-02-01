@@ -7,6 +7,7 @@ import random
 import xml.etree.ElementTree as ET
 from api_testing import pretty_print_xml
 from urllib.request import urlopen
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -30,7 +31,7 @@ def get_api_str(interval:int, line:str=None, direction:str=None, freighttrain:bo
 
 def get_train_table():
     base_url_et = 'https://siri.opm.jbv.no/jbv/et/EstimatedTimetable.xml?'
-    api_str = get_api_str(interval=60, line='R70', direction=None, freighttrain=False)
+    api_str = get_api_str(interval=10, line=None, direction=None, freighttrain=False)
 
     def get_api_xml_str(urlstr):
         try:
@@ -44,8 +45,9 @@ def get_train_table():
     xml_str = get_api_xml_str(api_str)
     root = ET.fromstring(xml_str)
 
+
     #folder='test_data/'
-    #tree = ET.parse(folder+'et_40_norge_pass.xml')
+    #tree = ET.parse(folder+'et_0606_error.xml')
     #root = tree.getroot() 
     
     traindata = parse_xml_tree(root)
@@ -68,7 +70,7 @@ def parse_xml_tree(root: ET.Element):
     # ingen tog som er ferdig med reisen.
     all_journeys = []
     name_spc = '{http://www.siri.org.uk/siri}'
-    #last_updated = get_accurate_time(root[0].findtext(name_spc+'ResponseTimestamp'))
+    current_time = to_datetime(root[0].findtext(name_spc+'ResponseTimestamp'))
 
     journey_count = 1
     delay_count = 0
@@ -95,28 +97,32 @@ def parse_xml_tree(root: ET.Element):
             cancelled = False
             if firstEstimatedCall.findtext(name_spc+'Cancellation')=='true':
                 cancelled = True
+            if firstEstimatedCall.findtext(name_spc+'DepartureStatus')=='cancelled': 
+                cancelled = True
 
             if not started:
                 if cancelled:
                     # Maybe use ['firstEstimatedCall.findtext(name_spc+'DepartureStatus')=='cancelled']
                     status = firstEstimatedCall.findtext(name_spc+'DepartureStatus')
                     remark = 'Kansellert'
-                    aim_departure = get_time(firstEstimatedCall.findtext(name_spc+'AimedDepartureTime'))
+                    aim_departure = to_datetime(firstEstimatedCall.findtext(name_spc+'AimedDepartureTime'))
+                    time_interval = get_time_difference(current_time, aim_departure)
                     last_stop = '-'
                     next_stop = firstEstimatedCall.findtext(name_spc+'StopPointName')
                     departure = '-'
-                    arrival = aim_departure
+                    arrival = aim_departure.strftime("%H:%M")
                     delay = 0
                 else:
                     # Journey will start soon.
                     status = firstEstimatedCall.findtext(name_spc+'DepartureStatus')
                     remark = 'Ikke startet'
-                    aim_departure = get_time(firstEstimatedCall.findtext(name_spc+'AimedDepartureTime'))
-                    exp_departure = get_time(firstEstimatedCall.findtext(name_spc+'ExpectedDepartureTime'))
+                    aim_departure = to_datetime(firstEstimatedCall.findtext(name_spc+'AimedDepartureTime'))
+                    exp_departure = to_datetime(firstEstimatedCall.findtext(name_spc+'ExpectedDepartureTime'))
+                    time_interval = get_time_difference(current_time, aim_departure)
                     last_stop = '-'
                     next_stop = firstEstimatedCall.findtext(name_spc+'StopPointName')
                     departure = '-'
-                    arrival = aim_departure
+                    arrival = aim_departure.strftime("%H:%M")
                     delay = get_time_difference(aim_departure, exp_departure)
             else:
                 recordedCalls = journey.find(name_spc+'RecordedCalls')
@@ -125,46 +131,77 @@ def parse_xml_tree(root: ET.Element):
                     # Next station is terminus.
                     status = firstEstimatedCall.findtext(name_spc+'ArrivalStatus')
                     remark = 'Terminus neste'
-                    rec_departure = get_time(lastRecordedCall.findtext(name_spc+'ActualDepartureTime'))
-                    aim_arrival = get_time(firstEstimatedCall.findtext(name_spc+'AimedArrivalTime'))
-                    exp_arrival = get_time(firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime'))
+                    rec_departure = lastRecordedCall.findtext(name_spc+'ActualDepartureTime')
+                    aim_departure = to_datetime(lastRecordedCall.findtext(name_spc+'AimedDepartureTime'))
+                    aim_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'AimedArrivalTime'))
+                    exp_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime'))
+                    time_interval = get_time_difference(current_time, aim_arrival)
                     last_stop = lastRecordedCall.findtext(name_spc+'StopPointName')
                     next_stop = firstEstimatedCall.findtext(name_spc+'StopPointName')
-                    departure = rec_departure
-                    arrival = aim_arrival
+                    if not rec_departure:
+                        departure = aim_departure.strftime("%H:%M")
+                    else:
+                        rec_departure = to_datetime(rec_departure)
+                        departure = rec_departure.strftime("%H:%M")
+                    arrival = aim_arrival.strftime("%H:%M")
                     delay = get_time_difference(aim_arrival, exp_arrival)
                 else:
                     # Middle of journey.
                     status = firstEstimatedCall.findtext(name_spc+'DepartureStatus')
                     remark = ''
-                    rec_departure = get_time(lastRecordedCall.findtext(name_spc+'ActualDepartureTime'))
-                    aim_arrival = get_time(firstEstimatedCall.findtext(name_spc+'AimedArrivalTime'))
-                    exp_arrival = get_time(firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime'))
-                    aim_departure = get_time(firstEstimatedCall.findtext(name_spc+'AimedDepartureTime'))
-                    exp_departure = get_time(firstEstimatedCall.findtext(name_spc+'ExpectedDepartureTime'))
+                    rec_departure = lastRecordedCall.findtext(name_spc+'ActualDepartureTime')
+                    aim_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'AimedArrivalTime'))
+                    exp_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime'))
+                    aim_departure = to_datetime(lastRecordedCall.findtext(name_spc+'AimedDepartureTime'))
+                    time_interval = get_time_difference(current_time, aim_arrival)
                     last_stop = lastRecordedCall.findtext(name_spc+'StopPointName')
                     next_stop = firstEstimatedCall.findtext(name_spc+'StopPointName')
-                    departure = rec_departure
-                    arrival = aim_arrival
+                    if not rec_departure:
+                        departure = aim_departure.strftime("%H:%M")
+                    else:
+                        rec_departure = to_datetime(rec_departure)
+                        departure = rec_departure.strftime("%H:%M")
+                    arrival = aim_arrival.strftime("%H:%M")
                     delay = get_time_difference(aim_arrival, exp_arrival)
-                if not rec_departure:
-                    departure = aim_departure
-            
+                if cancelled:
+                    remark = 'Kansellert videre'
+               
             if delay < 2:
                 delay = ''
             else:
                 delay_count += 1
                 delay = f'+ {delay} min'
-
+            
+            if time_interval > 120:
+                continue
+            # For debugging
+            #var = journey.findtext(name_spc+'DatedVehicleJourneyRef')
+            #print(f'FEIL  {journey_count} {line} {origin} {destination} {var} ')
+        
             single_journey = {
                 'Nr':journey_count, 'Linje':line, 'Fra':origin, 'Til':destination, 
-                'Med':operator, 'Forrige stasjon':last_stop, 'Avgang':departure, 'Neste stasjon':next_stop, 
-                'Ankomst':arrival, 'Forsinkelse': delay, 'Merknad':remark
+                'Med':operator, 'Forrige stasjon':last_stop, 'Utsjekket': departure, 'Neste stasjon':next_stop, 
+                'Oppsatt': arrival, 'Forsinkelse': delay, 'Merknad':remark
                 }
             journey_count += 1
             all_journeys.append(single_journey)
     all_journeys.append({'journeys':journey_count-1, 'delays':delay_count})
     return all_journeys
+
+def to_datetime(time_str):
+    return datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S+01:00")
+
+
+def get_time_difference(date1:datetime, date2:datetime):
+    timedelta = max([date1, date2]) - min([date1, date2])
+    seconds = timedelta.seconds
+    minutes = seconds//60
+    remainder = seconds%60
+    if remainder > 20:
+        minutes += 1
+    return minutes
+
+
 
 def get_time(timestamp: str):
     if timestamp:
@@ -176,16 +213,7 @@ def get_time(timestamp: str):
     else:
         return False
 
-def get_accurate_time(timestamp: str):
-    if timestamp:
-        #2023-01-29T05:32:00+01:00
-        timestamp = timestamp.removesuffix('+01:00')
-        [date, time] = timestamp.split('T')
-        return time
-    else:
-        return False
-
-def get_time_difference(time1:str, time2:str):
+def get_time_difference2(time1:str, time2:str):
     # time1 < time2
     time1 = time1.split(':')
     time2 = time2.split(':')
@@ -198,7 +226,7 @@ def get_time_difference(time1:str, time2:str):
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=8080, debug=True)
-
+  
 
 
 
