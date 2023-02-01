@@ -1,5 +1,5 @@
 body {
-    background-color: rgb(36, 53, 88);
+    background-color: rgb(31, 43, 135);
     color: rgb(255, 255, 255);
     font-family: Helvetica;
 }
@@ -10,7 +10,7 @@ body {
 }
 
 h1 {
-    color: rgb(189, 190, 217);
+    color: rgb(255, 85, 85);
     text-align: left;
     font-family: Gill Sans;
 }
@@ -20,15 +20,16 @@ table{
 }
 
 th {
-    background-color: rgb(22, 36, 63);
+    background-color: rgb(255, 85, 85);
     text-align: left;
+    color: rgb(13, 20, 70);
 }
 tr {
     text-align: left;
 }
 
 td {
-    background-color: rgb(193, 203, 222);
+    background-color: rgb(214, 220, 231);
     color:rgb(41, 41, 48)
 }
 

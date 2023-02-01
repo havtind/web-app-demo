@@ -10,24 +10,18 @@
   <br>
   <input type="button" id="updateButton" value="Oppdater tabell">
   <br>
-   
+  <br>
   
   Sist oppdatert : <span id='demo'> - </span>
-  <!--
-    <button type="button"
-  onclick="document.getElementById('demo').innerHTML = Date()">
-  Click me to display Date and Time.</button>
-
-  Current Date and Time is <span id='date-time'></span>
-  -->
   <br>
+  
    Antall aktive tog: <span id='trains'> - </span>
    <br>
    Antall forsinkede tog: <span id='delays'> - </span>
    <br>
 
    <div>
-   søkestreng: <span id='api_str'> placeholder </span>
+   Rådata: <span id='api_str'> - </span>
   </div>
    <br>
    Spesifiser søk om ønskelig
@@ -42,13 +36,16 @@
    <input type="text" id="interval" size="10">
    <br>
    <br>
+   Endestasjon (default alle):
+   <br>
+   <input type="text" id="terminus" size="10">
+   <br>
    <br>
    
   
   <br>
 
-
-
+<!--
   <time>
     <div class="tick-container">
       <div class="tick">
@@ -62,13 +59,14 @@
           </div>
         </div>
       </div>  
-    </div><!-- .tick-container -->
+    </div>
     
     <div id="minute" class="hand"></div>
     <div id="hour" class="hand"></div>
     <div id="second" class="hand"></div>
     
   </time>
+-->
 
 
   <input type="button" hidden id="antallRader" value="Vis antall rader">
@@ -84,57 +82,3 @@
 
 
 {% endblock %}
-
-
-
-
-
-
-
-
-
-
-<!--
-<body>
-  <div id="calc-container">
-    <h1>QTc calculator</h1>
-    <p>Please enter details to calculate the QTc:</p>
-
-    <form action="{{ url_for('index') }}" method="POST">
-      <label>Enter sex:</label>
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="sex" value="m" id="male-option">
-        <label class="form-check-label" for="male-option">
-          Male
-        </label>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="sex" value="f" id="female-option" checked>
-        <label class="form-check-label" for="female-option">
-          Female
-        </label>
-      </div>
-      <br>
-      <label>Enter HR (BPM):</label>
-      <input type="number" name="hr">
-      <br><br>
-      <label>Enter QT interval (msec):</label>
-      <input type="number" name="qt">
-      </br><br>
-      <input type="submit" name="next" value="Next">
-   </form>
-   <br><br>
-
-   {% if QTc_result %}
-     <h2>Results</h2>
-     <p>Compensated QT interval (Bazett formula) = {{QTc_result[0]}} msec.
-     <br>
-     {% if QTc_result[1] %}
-       This is a prolonged QT interval.
-     {%else%}
-       This is a normal QT interval.
-     {% endif %} 
-  {% endif %}
- </div>
-</body>
--->

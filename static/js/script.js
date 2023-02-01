@@ -25,29 +25,28 @@ $(document).ready(function(){
     }
 
     function update_table(interval_value) {
-        $.ajax({
-            url: '/update',
-            type: 'get',
-            data: {
-              interval: interval_value,
-              line: $('#line').val()
-            },
-            success: function(res){
-                var num_rows = document.querySelector("#test_table").rows.length
-                if (num_rows > 0) {
-                    $("#test_table thead").remove(); 
-                    $("#test_table tbody").remove(); 
-                }
-                response = JSON.parse(res)
-                let table = document.querySelector("#test_table");
-                let data = Object.keys(response[0]);
-                let table_data = response.slice(0,-1)
-                let stats = response.slice(-1)
-                update_stats(stats)           
-                generateTable(table, table_data);
-                generateTableHead(table, data);
-            }
-        }) 
+      fetch('/update?' + new URLSearchParams({
+        interval: interval_value,
+        terminus: $('#terminus').val(),
+        line: $('#line').val()
+    }))
+      .then((response) => response.json())
+      .then((response) => {
+        //console.log(response)
+        // interval=60&line=R70&terminus=STK'
+        var num_rows = document.querySelector("#test_table").rows.length
+        if (num_rows > 0) {
+            $("#test_table thead").remove(); 
+            $("#test_table tbody").remove(); 
+        }
+        let table = document.querySelector("#test_table");
+        let data = Object.keys(response[0]);
+        let table_data = response.slice(0,-1)
+        let stats = response.slice(-1)
+        update_stats(stats)           
+        generateTable(table, table_data);
+        generateTableHead(table, data);
+      });
     }
 
     function update_stats(stats) {
@@ -65,8 +64,7 @@ $(document).ready(function(){
         }
         update_table(interval)
         var today = new Date();
-        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        document.getElementById('demo').innerHTML = time
+        document.getElementById('demo').innerHTML = today.toTimeString().split(' ')[0]
     })
 
 
@@ -110,23 +108,31 @@ $(document).ready(function(){
 })
 
 
-//var dt = new Date();
-    //document.getElementById('date-time').innerHTML=dt;
+/*
+        //Using JQuery
+        $.ajax({
+            url: '/update',
+            type: 'get',
+            data: {
+              interval: interval_value,
+              line: $('#line').val(),
+              terminus: $('#terminus').val()
+            },
+            success: function(res){
 
-    /*
-    function displayValue() {
-        // gjør get request til main.py 
-        document.getElementById("answer").innerHTML = 'hei fra js'
-    }
-    document.getElementById('updateButton').addEventListener("click", displayValue);
-    */
-
-    /*
-    let mountains = [
-        { name: "Monte Falco", height: 1658, place: "Parco Foreste Casentinesi" },
-        { name: "Monte Falterona", height: 1654, place: "Parco Foreste Casentinesi" },
-        { name: "Poggio Scali", height: 1520, place: "Parco Foreste Casentinesi" },
-        { name: "Pratomagno", height: 1592, place: "Parco Foreste Casentinesi" },
-        { name: "Monte Amiata", height: 1738, place: "Siena" }
-      ];
-      */
+                var num_rows = document.querySelector("#test_table").rows.length
+                if (num_rows > 0) {
+                    $("#test_table thead").remove(); 
+                    $("#test_table tbody").remove(); 
+                }
+                response = JSON.parse(res)
+                let table = document.querySelector("#test_table");
+                let data = Object.keys(response[0]);
+                let table_data = response.slice(0,-1)
+                let stats = response.slice(-1)
+                update_stats(stats)           
+                generateTable(table, table_data);
+                generateTableHead(table, data);
+            }
+        }) 
+        */

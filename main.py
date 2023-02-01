@@ -30,11 +30,13 @@ def get_api_str(interval:int, line:str=None, direction:str=None, freighttrain:bo
     return api_str
 
 
-def get_train_table(interval, line):
+def get_train_table(interval, line, terminus):
     if line=='':
         line = None
+    if terminus=='':
+        terminus = None
     base_url_et = 'https://siri.opm.jbv.no/jbv/et/EstimatedTimetable.xml?'
-    api_str = get_api_str(interval=interval, line=line, direction=None, freighttrain=False)
+    api_str = get_api_str(interval=interval, line=line, direction=terminus, freighttrain=False)
 
     def get_api_xml_str(urlstr):
         try:
@@ -70,7 +72,9 @@ def update_func():
     # celsius = request.args.get("celsius", "")
     line = request.args.get('line')
     interval = request.args.get('interval')
-    jsonString = json.dumps(get_train_table(interval, line), indent=4)
+    terminus = request.args.get('terminus')
+    print(f'line: {line}   interval {interval}   terminus  {terminus}  ')
+    jsonString = json.dumps(get_train_table(interval, line, terminus), indent=4)
     return jsonString
 
 
@@ -130,13 +134,19 @@ def parse_xml_tree(root: ET.Element, api_str:str):
                     status = firstEstimatedCall.findtext(name_spc+'DepartureStatus')
                     remark = 'Ikke startet'
                     aim_departure = to_datetime(firstEstimatedCall.findtext(name_spc+'AimedDepartureTime'))
-                    exp_departure = to_datetime(firstEstimatedCall.findtext(name_spc+'ExpectedDepartureTime'))
+                    exp_departure = firstEstimatedCall.findtext(name_spc+'ExpectedDepartureTime')
                     time_interval = get_time_difference(current_time, aim_departure)
                     last_stop = '-'
                     next_stop = firstEstimatedCall.findtext(name_spc+'StopPointName')
                     departure = '-'
-                    arrival = aim_departure.strftime("%H:%M")
-                    delay = get_time_difference(aim_departure, exp_departure)
+                    
+                    if not exp_departure:
+                        arrival = aim_departure.strftime("%H:%M")
+                        delay = 0
+                    else:
+                        exp_departure = to_datetime(exp_departure)
+                        arrival = exp_departure.strftime("%H:%M")
+                        delay = get_time_difference(aim_departure, exp_departure)
             else:
                 recordedCalls = journey.find(name_spc+'RecordedCalls')
                 lastRecordedCall = recordedCalls[-1]
@@ -147,35 +157,46 @@ def parse_xml_tree(root: ET.Element, api_str:str):
                     rec_departure = lastRecordedCall.findtext(name_spc+'ActualDepartureTime')
                     aim_departure = to_datetime(lastRecordedCall.findtext(name_spc+'AimedDepartureTime'))
                     aim_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'AimedArrivalTime'))
-                    #exp_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime'))
+                    exp_arrival = firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime')
                     time_interval = get_time_difference(current_time, aim_arrival)
                     last_stop = lastRecordedCall.findtext(name_spc+'StopPointName')
                     next_stop = firstEstimatedCall.findtext(name_spc+'StopPointName')
                     if not rec_departure:
-                        departure = aim_departure.strftime("%H:%M")
+                        departure = 'ingen info'
                     else:
                         rec_departure = to_datetime(rec_departure)
                         departure = rec_departure.strftime("%H:%M")
-                    arrival = aim_arrival.strftime("%H:%M")
-                    delay = get_time_difference(aim_arrival, aim_arrival)
+                    if not exp_arrival:
+                        arrival = 'ingen info'
+                        delay = 0
+                    else:
+                        exp_arrival = to_datetime(exp_arrival)
+                        arrival = exp_arrival.strftime("%H:%M")
+                        delay = get_time_difference(aim_arrival, exp_arrival)
                 else:
                     # Middle of journey.
                     status = firstEstimatedCall.findtext(name_spc+'DepartureStatus')
                     remark = ''
                     rec_departure = lastRecordedCall.findtext(name_spc+'ActualDepartureTime')
                     aim_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'AimedArrivalTime'))
-                    #exp_arrival = to_datetime(firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime'))
+                    exp_arrival = firstEstimatedCall.findtext(name_spc+'ExpectedArrivalTime')
                     aim_departure = to_datetime(lastRecordedCall.findtext(name_spc+'AimedDepartureTime'))
                     time_interval = get_time_difference(current_time, aim_arrival)
                     last_stop = lastRecordedCall.findtext(name_spc+'StopPointName')
                     next_stop = firstEstimatedCall.findtext(name_spc+'StopPointName')
                     if not rec_departure:
-                        departure = aim_departure.strftime("%H:%M")
+                        departure = 'ingen info'
                     else:
                         rec_departure = to_datetime(rec_departure)
                         departure = rec_departure.strftime("%H:%M")
-                    arrival = aim_arrival.strftime("%H:%M")
-                    delay = get_time_difference(aim_arrival, aim_arrival)
+                    if not exp_arrival:
+                        arrival = 'ingen info'
+                        delay = 0
+                    else:
+                        exp_arrival = to_datetime(exp_arrival)
+                        arrival = exp_arrival.strftime("%H:%M")
+                        delay = get_time_difference(aim_arrival, exp_arrival)
+
                 if cancelled:
                     remark = 'Kansellert videre'
                
@@ -183,7 +204,7 @@ def parse_xml_tree(root: ET.Element, api_str:str):
                 delay = ''
             else:
                 delay_count += 1
-                delay = f'+ {delay} min'
+                delay = f'( {delay} min )'
             
             if time_interval > 120:
                 continue
@@ -193,8 +214,8 @@ def parse_xml_tree(root: ET.Element, api_str:str):
         
             single_journey = {
                 'Nr':journey_count, 'Linje':line, 'Fra':origin, 'Til':destination, 
-                'Med':operator, 'Forrige stasjon':last_stop, 'Utsjekket': departure, 'Neste stasjon':next_stop, 
-                'Oppsatt': arrival, 'Forsinkelse': delay, 'Merknad':remark
+                'Med':operator, 'Forrige stasjon':last_stop, 'Avreist': departure, 'Neste stasjon':next_stop, 
+                'Forventes': arrival, 'Forsinkelse': delay, 'Merknad':remark
                 }
             journey_count += 1
             all_journeys.append(single_journey)
