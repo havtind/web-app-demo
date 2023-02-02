@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 
 from urllib.request import urlopen
 from datetime import datetime
+from collections import defaultdict
 
 
 app = Flask(__name__)
@@ -30,11 +31,17 @@ def get_api_str(interval:int, line:str=None, direction:str=None, freighttrain:bo
     return api_str
 
 
-def get_train_table(interval, line, terminus):
+
+def get_train_table(interval, line, terminus, display):
+    
+    station_dict = {'Oslo S': 'OSL', 'Bergen': 'BRG', 'Eidsvoll': 'EVL', 'Kongsberg': 'KBG', 'Drammen': 'DRM', 'Lillehammer': 'LHM', 'Stavanger': 'STV', 'Egersund': 'EGS', 'Myrdal': 'MYR', 'Flåm': 'FM', 'Spikkestad': 'SPI', 'Lillestrøm': 'LLS', 'Trondheim S': 'TND', 'Bodø': 'BO', 'Göteborg C': 'GTB', 'Halden': 'HLD', 'Oslo Lufthavn': 'GAR', 'Moss': 'MOS', 'Nærbø': 'NBØ', 'Lundamo': 'LMO', 'Steinkjer': 'STK', 'Dombås': 'DOM', 'Åndalsnes': 'ÅND', 'Stabekk': 'STB', 'Ski': 'SKI', 'Kongsvinger': 'KVG', 'Asker': 'ASR', 'Hamar': 'HMR', 'Melhus': 'MSK', 'Mo i Rana': 'MO', 'Storlien': 'STR', 'Skien': 'SKN', 'Mysen': 'MYS', 'Arna': 'ARN', 'Mosjøen': 'MSJ', 'Gjøvik': 'GJØ', 'Røros': 'ROS', 'Dal': 'DAL', 'Jaren': 'JAR', 'Arendal': 'ADL', 'Nelaug': 'NEL'}
+
     if line=='':
         line = None
     if terminus=='':
         terminus = None
+    else: 
+        terminus = station_dict[terminus]
     base_url_et = 'https://siri.opm.jbv.no/jbv/et/EstimatedTimetable.xml?'
     api_str = get_api_str(interval=interval, line=line, direction=terminus, freighttrain=False)
 
@@ -63,7 +70,7 @@ def get_train_table(interval, line, terminus):
     #tree = ET.parse(folder+'et_0606_error.xml')
     #root = tree.getroot() 
     
-    traindata = parse_xml_tree(root, url_str)
+    traindata = parse_xml_tree(root, url_str, display)
     return traindata
 
 
@@ -73,14 +80,17 @@ def update_func():
     line = request.args.get('line')
     interval = request.args.get('interval')
     terminus = request.args.get('terminus')
+    display = request.args.get('display')
     print(f'line: {line}   interval {interval}   terminus  {terminus}  ')
-    jsonString = json.dumps(get_train_table(interval, line, terminus), indent=4)
+    jsonString = json.dumps(get_train_table(interval, line, terminus, display), indent=4)
     return jsonString
 
 
 
 
-def parse_xml_tree(root: ET.Element, api_str:str):
+def parse_xml_tree(root: ET.Element, api_str:str, display:str):
+    #operator_dict = defaultdict('Ukjent')
+    operator_dict = {'VY': 'VY', 'SJN': 'SJ Nord', 'GAG': 'Go-Ahead', 'VYG': 'Vy Gjøvikb.', 'FLY': 'Flytoget', 'VYT':'VY'}
     # tidspunkt hentet ut, 
     #'Nr', 'Linje', 'Fra', 'Til', 'Med', 'Forrige stasjon', 'Kl', 'Neste stasjon', 'Kl', 'Forsinkelse', 'Merknad']
     # ingen godstog
@@ -95,7 +105,6 @@ def parse_xml_tree(root: ET.Element, api_str:str):
 
     for journey in root.iter(tag=name_spc+journey_str):
         """Iterates over all train journeys"""
-        train = {}
         line = journey.findtext(name_spc+'LineRef')
         origin = journey.findtext(name_spc+'OriginName')
         destination = journey.findtext(name_spc+'DestinationName')
@@ -198,24 +207,34 @@ def parse_xml_tree(root: ET.Element, api_str:str):
                         delay = get_time_difference(aim_arrival, exp_arrival)
 
                 if cancelled:
-                    remark = 'Kansellert videre'
-               
+                    if display=='liten':
+                        remark = 'Delvis kansellert'
+                    else:
+                        remark = 'Kansellert videre'
+                
             if delay < 2:
                 delay = ''
             else:
                 delay_count += 1
-                delay = f'( {delay} min )'
+                delay = f'{delay} min'
             
             if time_interval > 120:
                 continue
             # For debugging
             #var = journey.findtext(name_spc+'DatedVehicleJourneyRef')
             #print(f'FEIL  {journey_count} {line} {origin} {destination} {var} ')
-        
-            single_journey = {
+            if display == 'liten':
+                if not started and not cancelled:
+                    remark = f'Starter kl {arrival}'
+                single_journey = {
+                    'Nr':journey_count, 'Linje':line, 'Fra':origin, 'Til':destination, 
+                    'Med': operator_dict[operator], 'Forsinkelse': delay, 'Merknad':remark
+                    }
+            else:
+                single_journey = {
                 'Nr':journey_count, 'Linje':line, 'Fra':origin, 'Til':destination, 
                 'Med':operator, 'Forrige stasjon':last_stop, 'Avreist': departure, 'Neste stasjon':next_stop, 
-                'Forventes': arrival, 'Forsinkelse': delay, 'Merknad':remark
+                'Estimert': arrival, 'Forsinkelse': delay, 'Merknad':remark
                 }
             journey_count += 1
             all_journeys.append(single_journey)

@@ -2,12 +2,62 @@ body {
     background-color: rgb(31, 43, 135);
     color: rgb(255, 255, 255);
     font-family: Helvetica;
+    background: linear-gradient(to right, rgb(31, 43, 135), rgb(24, 35, 118));
 }
 
 #hoveddel {
-    padding: 20px;
+    padding: 40px;
 
 }
+
+
+.layout {
+  width: 1200px;
+  height: 500px;
+
+  display: grid;
+  grid:
+    "topleft1 topright1" 1fr
+    "bottomleft1 bottomright1" 1fr
+    / 1fr 1fr;
+  gap: 20px;
+}
+
+.topleft1 { grid-area: topleft1; }
+.topright1 { grid-area: topright1; }
+.bottomleft1 { grid-area: bottomleft1; }
+
+.bottomright1 { 
+  padding-top: 100px; 
+  grid-area: bottomright1; 
+  justify-content: center;
+  align-items: center; 
+}
+
+
+
+
+
+
+
+#stats {
+  background-color: rgb(30, 26, 94);
+  width: 200px;
+  padding: 50px;
+  margin: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+#parameters {
+  background-color: rgb(30, 26, 94);
+  width: 200px;
+  padding: 50px;
+  margin: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
 
 h1 {
     color: rgb(255, 85, 85);
@@ -30,82 +80,174 @@ tr {
 
 td {
     background-color: rgb(214, 220, 231);
-    color:rgb(41, 41, 48)
+    color:rgb(41, 41, 48);
+    max-width: 100%;
+    white-space:nowrap;
 }
 
-time {
-    display:block;
-    cursor:pointer;
-    position:relative;
-    width:300px;
-    height:300px;
-    margin:30px auto;
-    border-radius:50%;
-    background:whitesmoke;
-    border:10px solid #999;
-    box-shadow:
-      inset 1px 2px #888,
-      inset 2px 4px #888,
-      1px 2px #888,
-      2px 4px #888,
-      3px 6px #888,
-      4px 8px #888,
-      5px 10px #888,
-      6px 12px #888,
-      7px 14px #888,
-      -10px -5px #c5c5c5;
-  }
-  
-  .hand { position:absolute; opacity:0; transition:opacity .2s; }
-  
-  .tick-container { position:absolute; left:145px; top:15px; }
-  .tick { width:10px; height:270px; transform-origin:center center; transform:rotate(30deg); }
-  
-  .tick:before, .tick:after { position:absolute; display:block; content:""; width:10px; height:25px; background:#222; }
-  .tick:after { bottom:0; }
-  
-  
-  #minute {
-    width:12px;
-    height:160px;
-    top:15px;
-    background:rgba(20,20,20,0.9);
-    left:144px;
-    transform-origin:center 135px;
-  }
-  
-  #hour {
-    width:16px;
-    height:132px;
-    top:50px;
-    background:rgba(20,20,20,0.9);
-    left:142px;
-    transform-origin:center 100px;
-  }
-  
-  #second {
-    width:4px;
-    height:155px;
-    top:30px;
-    background:rgb(255,70,70);
-    left:149px;
-    transform-origin:center 120px;
-    animation:seconds 60s linear infinite;
-  }
-  
-  @keyframes seconds {
-    0%{ transform:rotate(0); }
-    97.5%,100%{ transform:rotate(1turn); }
-  }
-  
-  #second:after {
-    content:"";
-    background:rgb(255,70,70);
-    display:block;
-     width:20px;
-    height:20px;
-    border-radius:50%;
-    position:absolute;
-    left:-8px;
-  }
-  
+
+
+
+
+.button{
+  position: relative;
+  background-color: rgb(36, 171, 99);
+  border-radius: 4em;
+  font-size: 16px;
+  color: white;
+  padding: 0.8em 1.8em;
+  cursor:pointer;
+  user-select:none;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition-duration: 0.4s;
+  -webkit-transition-duration: 0.4s; /* Safari */
+}
+
+.button:hover {
+  transition-duration: 0.1s;
+  background-color: rgb(72, 207, 135);
+}
+
+.button:after {
+  content: "";
+  display: block;
+  position: absolute;
+  border-radius: 4em;
+  left: 0;
+  top:0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: all 0.3s;
+  box-shadow: 0 0 5px 20px white;
+}
+
+.button:active:after {
+  box-shadow: 0 0 0 0 white;
+  position: absolute;
+  border-radius: 4em;
+  left: 0;
+  top:0;
+  opacity: 1;
+  transition: 0s;
+}
+
+.button:active {
+  top: 1px;
+}
+
+
+
+
+
+
+
+.demo-container {
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  text-align: middle;
+}
+
+.demo-container.clocks.single .clock {
+  height: 25vmin;
+  width: 25vmin;
+  padding: 0;
+  margin: auto;
+  border: 10px solid #424242;
+}
+
+.clock {
+  border-radius: 50%;
+  background: -webkit-radial-gradient(#000, #000 0.1em, #fff 0.1em, #fff), #fff;
+  background: radial-gradient(#000, #000 0.1em, #fff 0.1em, #fff), #fff;
+  display: inline-block;
+  padding-bottom: 31.333%;
+  position: relative;
+  width: 31.333%;
+}
+
+.clock::after {
+  display: none;
+  background: red;
+  border-radius: 50%;
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  width: 4%;
+  height: 4%;
+  z-index: 10;
+}
+
+.clock.station {
+  background: #fff url('../img/station_clock.svg') no-repeat center;
+  background-size: 95%;
+  box-shadow: 0 0 1em rgba(0, 0, 0, 0.2) inset;
+}
+
+.clock.station .seconds::before {
+  background: red;
+  border-radius: 100%;
+  content: "";
+  position: absolute;
+  top: -15%;
+  left: -342%;
+  height: 23.98765%;
+  width: 800%;
+}
+
+.minutes-container, .hours-container, .seconds-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+}
+
+.seconds {
+  background: red;
+  width: 1.25%;
+  height: 42%;
+  position: absolute;
+  left: 49.39%;
+  top: 20%;
+  -webkit-transform-origin: 50% 71%;
+  -ms-transform-origin: 50% 71%;
+  transform-origin: 50% 71%;
+  z-index: 8;
+}
+
+.minutes {
+  background: #000;
+  width: 4.2%;
+  height: 55%;
+  position: absolute;
+  left: 48.1%;
+  top: 6.95%;
+  -webkit-transform-origin: 50% 78.5%;
+  -ms-transform-origin: 50% 78.5%;
+  transform-origin: 50% 78.5%;
+}
+
+.hours {
+  background: #000;
+  width: 3.5%;
+  height: 40%;
+  position: absolute;
+  left: 48.25%;
+  top: 22%;
+  -webkit-transform-origin: 50% 71%;
+  -ms-transform-origin: 50% 71%;
+  transform-origin: 50% 71%;
+}
+
+article div div, article div div:before {
+  box-shadow: 0 0 5px 0px rgba(0, 0, 0, 0.05);
+}

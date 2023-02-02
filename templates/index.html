@@ -7,78 +7,80 @@
 
   <h1>Togstatus i Norge</h1>
 
-  <br>
-  <input type="button" id="updateButton" value="Oppdater tabell">
-  <br>
-  <br>
-  
-  Sist oppdatert : <span id='demo'> - </span>
-  <br>
-  
-   Antall aktive tog: <span id='trains'> - </span>
-   <br>
-   Antall forsinkede tog: <span id='delays'> - </span>
-   <br>
 
-   <div>
-   Rådata: <span id='api_str'> - </span>
-  </div>
-   <br>
-   Spesifiser søk om ønskelig
-   <br>
-   Linje (default alle linjer):
-   <br>
-   <input type="text" id="line"  size="10">
-   <br>
-   <br>
-   Tidshorisont i minutter (default 30 min):
-   <br>
-   <input type="text" id="interval" size="10">
-   <br>
-   <br>
-   Endestasjon (default alle):
-   <br>
-   <input type="text" id="terminus" size="10">
-   <br>
-   <br>
-   
-  
-  <br>
 
-<!--
-  <time>
-    <div class="tick-container">
-      <div class="tick">
-        <div class="tick">
-          <div class="tick">
-            <div class="tick">
-              <div class="tick">
-                <div class="tick"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>  
+  <section class="layout">
+    <div class="bottomleft1">
+      <div id="parameters">
+        <form>
+            <input type="radio" id="liten_tab" name="visningsvalg" value="liten" checked="checked">
+            <label for="liten_tab">Liten tabell</label><br>
+            <input type="radio" id="stor_tab" name="visningsvalg" value="stor">
+            <label for="stor_tab">Stor tabell</label><br>
+          </form> 
+        Linje
+        <div class="box">
+        <select id="line">
+        </select>
+      </div>
+        
+        Endestasjon
+        <div class="box">
+       <select id="terminus">
+       </select>
+      </div>
+      </div>
     </div>
-    
-    <div id="minute" class="hand"></div>
-    <div id="hour" class="hand"></div>
-    <div id="second" class="hand"></div>
-    
-  </time>
--->
+
+    <div class="topright1">
+      <div class="demo-container clocks single">
+        <article class="clock station show linear bounce">
+            <div class="hours-container" id="hours-container">
+                <div class="hours"></div>
+            </div>
+            <div class="minutes-container" id="minutes-container">
+                <div class="minutes"></div>
+            </div>
+            <div class="seconds-container" id="seconds-container">
+                <div class="seconds"></div>
+            </div>
+        </article>
+      </div>
+    </div>
+
+    <div class="bottomright1">
+      <a id=updateButton class="button">Oppdater</a>
+    </div>
+
+    <div class="topleft1">
+      <div id="stats">
+        Sist oppdatert: <span id='demo'> - </span>
+        <br>
+        <br>
+        Antall aktive tog: <span id='trains'> - </span>
+        <br>
+        Antall forsinkede tog: <span id='delays'> - </span>
+        <br>
+      </div>
+    </div>
+  </section>
 
 
-  <input type="button" hidden id="antallRader" value="Vis antall rader">
-  <br>
-  <br>
-
-  <br>
-  <br>
   
   <table id="test_table">
   </table>
 
 
+
+  <br>
+  <input hidden type="text" id="interval" size="10">
+  <br>
+
+  <div hidden>
+    Rådata: <span id='api_str'> - </span>
+   </div>
+
+   <input type="button" hidden id="antallRader" value="Vis antall rader">
+ 
 
 {% endblock %}

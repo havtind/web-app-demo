@@ -36,17 +36,22 @@ def get_time_date(timestamp: str):
     else:
         return 'XX'
 
-
+station_dict = {'Oslo S': 'OSL', 'Bergen': 'BRG', 'Eidsvoll': 'EVL', 'Kongsberg': 'KBG', 'Drammen': 'DRM', 'Lillehammer': 'LHM', 'Stavanger': 'STV', 'Egersund': 'EGS', 'Myrdal': 'MYR', 'Flåm': 'FM', 'Spikkestad': 'SPI', 'Lillestrøm': 'LLS', 'Trondheim S': 'TND', 'Bodø': 'BO', 'Göteborg C': 'GTB', 'Halden': 'HLD', 'Oslo Lufthavn': 'GAR', 'Moss': 'MOS', 'Nærbø': 'NBØ', 'Lundamo': 'LMO', 'Steinkjer': 'STK', 'Dombås': 'DOM', 'Åndalsnes': 'ÅND', 'Stabekk': 'STB', 'Ski': 'SKI', 'Kongsvinger': 'KVG', 'Asker': 'ASR', 'Hamar': 'HMR', 'Melhus': 'MSK', 'Mo i Rana': 'MO', 'Storlien': 'STR', 'Skien': 'SKN', 'Mysen': 'MYS', 'Arna': 'ARN', 'Mosjøen': 'MSJ', 'Gjøvik': 'GJØ', 'Røros': 'ROS', 'Dal': 'DAL', 'Jaren': 'JAR', 'Arendal': 'ADL', 'Nelaug': 'NEL'}
 
 def pretty_print_xml(root: ET.Element):
     journey = 'EstimatedVehicleJourney'
     count = 1
+    station_dict = {}
     for tex in root.iter(tag=name_spc+journey):
         lineref = tex.findtext(name_spc+'LineRef')
         destination = tex.findtext(name_spc+'DestinationName')
         origin = tex.findtext(name_spc+'OriginName')
         operator = tex.findtext(name_spc+'OperatorRef')
 
+        station_dict[destination] = tex.findtext(name_spc+'DirectionRef')
+        station_dict[origin] = tex.findtext(name_spc+'OriginRef')        
+
+        """
         started = False
         done = False
         if tex.find(name_spc+'RecordedCalls'):
@@ -103,8 +108,15 @@ def pretty_print_xml(root: ET.Element):
             print(f'{" ":7}', end='')
             merknad = 'ferdig'
             print(f' {merknad:14} ')
-
+        """
         count += 1
+    """
+    set_lines = set(lines)
+    list_res = (list(set_lines))
+    list_res = sorted(list_res)
+    print(list_res)
+    """
+    print(station_dict)
 
 def get_api_str(interval:int, line:str=None, direction:str=None, freighttrain:bool=False):
     api_str = f'PreviewInterval=PT{interval}M'
@@ -271,12 +283,12 @@ if __name__ == "__main__":
     #root = ET.fromstring(xml_str)
     
     """Saved xml"""
-    tree = ET.parse(folder+'sm_osl.xml')
+    tree = ET.parse(folder+'et_40_norge_pass.xml')
     root = tree.getroot() 
 
     res = root[0].findtext(name_spc+'ResponseTimestamp')
     print(res)
 
-    #pretty_print_xml(root)
+    pretty_print_xml(root)
 
     #parse_xml_tree(root)

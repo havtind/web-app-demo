@@ -3,3 +3,5 @@ myvenv
 .gcloudignore
 plan.txt
 __pycache__/
+lines.txt
+terminus.txt
