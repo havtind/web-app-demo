@@ -2,60 +2,150 @@ body {
     background-color: rgb(31, 43, 135);
     color: rgb(255, 255, 255);
     font-family: Helvetica;
-    background: linear-gradient(to right, rgb(31, 43, 135), rgb(24, 35, 118));
-}
-
-#hoveddel {
-    padding: 40px;
-
+    background: linear-gradient(to right, rgb(22, 32, 106), rgb(14, 23, 91));
 }
 
 
-.layout {
-  width: 1200px;
-  height: 500px;
 
+.grid_layout {
+  height: 300px;
+  width: 100%;
   display: grid;
-  grid:
-    "topleft1 topright1" 1fr
-    "bottomleft1 bottomright1" 1fr
-    / 1fr 1fr;
+  grid-template-columns: 1fr 8fr 8fr 1fr;
+  grid-template-rows: 1fr 2fr 2fr 2fr 2fr 1fr;
   gap: 20px;
-}
-
-.topleft1 { grid-area: topleft1; }
-.topright1 { grid-area: topright1; }
-.bottomleft1 { grid-area: bottomleft1; }
-
-.bottomright1 { 
-  padding-top: 100px; 
-  grid-area: bottomright1; 
   justify-content: center;
-  align-items: center; 
+  
 }
 
 
 
+.box1 {  
+  grid-row: 2;
+  grid-column: 2/4;
+  padding-left: 20px;
+
+}
+.box2 { 
+  grid-row: 3;
+  grid-column: 2;
+  padding-left: 20px;
+
+}
+.box3 { 
+  grid-row: 3;
+  grid-column: 3;
+
+}
+.box4 { 
+  grid-row: 4;
+  grid-column: 2;
+
+}
+.box5 { 
+  grid-row: 4;
+  grid-column: 3;
+  padding-top: 13px;
+  padding-left: 6vmin;
+
+}
+.box6 { 
+  grid-row: 5/6;
+  grid-column: 2/4;
+
+}
+
+
+
+
+.stat_grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 10px;
+  justify-content: center;
+  
+}
+
+.last_update_grid {  
+
+  grid-column: 1;
+
+  text-align: left;
+  letter-spacing: 2px;
+
+}
+.last_update_grid_value {  
+
+  grid-column: 2;
+}
+.trains_grid {  
+
+  grid-column: 1;
+  text-align: left;
+  letter-spacing: 2px;
+}
+.trains_grid_value {  
+
+  grid-column: 2;
+}
+.delays_grid {  
+
+  grid-column: 1;
+  text-align: left;
+  letter-spacing: 2px;
+}
+.delays_grid_value {  
+
+  grid-column: 2;
+}
+
+
+
+
+.parameter_grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  justify-content: center;
+  
+}
+.line_grid {  
+  grid-column: 1;
+  text-align: left;
+  letter-spacing: 2px;
+  padding-left: 20px;
+}
+
+.terminus_grid {  
+  grid-column: 1;
+  text-align: left;
+  letter-spacing: 2px;
+  padding-left: 20px;
+
+}
+
+#terminus {
+  width: 120px;
+}
+#line {
+  width: 120px;
+}
 
 
 
 
 #stats {
-  background-color: rgb(30, 26, 94);
-  width: 200px;
+  justify-content: left;
+  align-items: left;
   padding: 50px;
-  margin: 20px;
-  justify-content: center;
-  align-items: center;
 }
 
 #parameters {
-  background-color: rgb(30, 26, 94);
-  width: 200px;
   padding: 50px;
-  margin: 20px;
-  justify-content: center;
-  align-items: center;
+  justify-content: left;
+  align-items: left;
 }
 
 
@@ -66,25 +156,55 @@ h1 {
 }
 
 table{
+    table-layout: fixed;
     width: 100%;
+    border-collapse: separate;
+    background-color: #0d0d0e;
+    border-spacing: 5px;
+    /*border: 7px solid rgb(0, 0, 0);*/
+}
+
+thead th:nth-child(1) {
+  width: 6%;
+}
+
+
+thead th:nth-child(7) {
+  width: 6%;
 }
 
 th {
-    background-color: rgb(255, 85, 85);
+    background: linear-gradient(
+    to bottom,
+    rgb(26, 26, 27),
+    rgb(0, 0, 0)
+    );
     text-align: left;
-    color: rgb(13, 20, 70);
-}
-tr {
-    text-align: left;
+    color: rgb(255, 255, 255);
+    padding: 7px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    /*text-shadow: 1px 1px 1px black; */
+    position: sticky;
+    top: 0;
 }
 
-td {
+
+tbody td {
     background-color: rgb(214, 220, 231);
-    color:rgb(41, 41, 48);
+    color:rgb(255, 248, 48);
     max-width: 100%;
     white-space:nowrap;
+    padding: 5px;
+    text-align: left;
+    background: linear-gradient(
+    to bottom,
+    rgb(45, 47, 50),
+    rgb(31, 32, 34)
+    );
+    border: 0px solid purple;
+    letter-spacing: 1px;
 }
-
 
 
 
@@ -145,7 +265,7 @@ td {
 
 
 .demo-container {
-  width: 100vw;
+  width: 30vw;
   margin: 0;
   padding: 0;
   text-align: middle;
@@ -156,7 +276,7 @@ td {
   width: 25vmin;
   padding: 0;
   margin: auto;
-  border: 10px solid #424242;
+  border: 10px solid #0b0e2f;
 }
 
 .clock {

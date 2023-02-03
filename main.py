@@ -61,16 +61,18 @@ def get_train_table(interval, line, terminus, display):
         except ValueError:
             return 'Not able to make api call'
 
+
     print(base_url_et+api_str)
     url_str = base_url_et+api_str
+
     xml_str = get_api_xml_str(url_str)
     root = ET.fromstring(xml_str)
 
     #folder='test_data/'
-    #tree = ET.parse(folder+'et_0606_error.xml')
+    #tree = ET.parse(folder+'et_40_norge_pass.xml')
     #root = tree.getroot() 
     
-    traindata = parse_xml_tree(root, url_str, display)
+    traindata = parse_xml_tree(root, url_str, display='liten')
     return traindata
 
 
@@ -90,7 +92,7 @@ def update_func():
 
 def parse_xml_tree(root: ET.Element, api_str:str, display:str):
     #operator_dict = defaultdict('Ukjent')
-    operator_dict = {'VY': 'VY', 'SJN': 'SJ Nord', 'GAG': 'Go-Ahead', 'VYG': 'Vy Gjøvikb.', 'FLY': 'Flytoget', 'VYT':'VY'}
+    operator_dict = {'VY': 'VY', 'SJN': 'SJNord', 'GAG': 'GoAhead', 'VYG': 'VYGjøvikb.', 'FLY': 'Flytoget', 'VYT':'VY'}
     # tidspunkt hentet ut, 
     #'Nr', 'Linje', 'Fra', 'Til', 'Med', 'Forrige stasjon', 'Kl', 'Neste stasjon', 'Kl', 'Forsinkelse', 'Merknad']
     # ingen godstog
@@ -220,30 +222,18 @@ def parse_xml_tree(root: ET.Element, api_str:str, display:str):
             
             if time_interval > 120:
                 continue
-            # For debugging
-            #var = journey.findtext(name_spc+'DatedVehicleJourneyRef')
-            #print(f'FEIL  {journey_count} {line} {origin} {destination} {var} ')
-            if display == 'liten':
-                if not started and not cancelled:
-                    remark = f'Starter kl {arrival}'
-                single_journey = {
-                    'Nr':journey_count, 'Linje':line, 'Fra':origin, 'Til':destination, 
-                    'Med': operator_dict[operator], 'Forsinkelse': delay, 'Merknad':remark
-                    }
-            else:
-                single_journey = {
-                'Nr':journey_count, 'Linje':line, 'Fra':origin, 'Til':destination, 
-                'Med':operator, 'Forrige stasjon':last_stop, 'Avreist': departure, 'Neste stasjon':next_stop, 
-                'Estimert': arrival, 'Forsinkelse': delay, 'Merknad':remark
-                }
+    
+            single_journey = {
+                'Linje':line, 'Fra':origin, 'Til':destination, 
+                'Operatør': operator_dict[operator], 'Neste stasjon':next_stop, 'Estimert': arrival, 'Avvik': delay, 'Merknad':remark
+                }      
             journey_count += 1
             all_journeys.append(single_journey)
     if journey_count == 1:
         single_journey = {
-                'Nr': '-', 'Linje': '-', 'Fra': '-', 'Til': '-', 
-                'Med': '-', 'Forrige stasjon':'-', 'Utsjekket': '-', 'Neste stasjon':'-', 
-                'Oppsatt': '-', 'Forsinkelse': '-', 'Merknad': 'Ingen oppsatte tog!'
-                }
+                'Linje': '-', 'Fra':'-', 'Til':'-', 
+                'Operatør': '-', 'Neste stasjon':'-', 'Estimert': '-', 'Avvik': '-', 'Merknad':'Ingen oppsatte tog!'
+                }   
         all_journeys.append(single_journey)
     all_journeys.append({'journeys':journey_count-1, 'delays': delay_count, 'api_str': api_str})
     return all_journeys

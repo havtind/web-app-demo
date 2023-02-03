@@ -34,7 +34,7 @@ function generateTable(table, data) {
 function update_stats(stats) {
   document.getElementById('trains').innerHTML = stats[0].journeys
   document.getElementById('delays').innerHTML = stats[0].delays
-  document.getElementById('api_str').innerHTML = stats[0].api_str
+  console.log('Her er lenke til rådataene')
   console.log(stats[0].api_str)
 }
 
@@ -83,12 +83,7 @@ function fill_station_dropdown() {
 
 
 function run_update() {
-  console.log('Her er lenke til rådataene')
   var interval = 30
-  /*
-  if (!(document.getElementById('interval').value=='')) {
-    interval = document.getElementById('interval').value
-  } */
   update_table(interval)
   var today = new Date();
   document.getElementById('demo').innerHTML = today.toTimeString().split(' ')[0]
