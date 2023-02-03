@@ -40,8 +40,10 @@ def get_train_table(interval, line, terminus, display):
         line = None
     if terminus=='':
         terminus = None
-    else: 
+    elif terminus in station_dict.keys():
         terminus = station_dict[terminus]
+    else:
+        terminus = None
     base_url_et = 'https://siri.opm.jbv.no/jbv/et/EstimatedTimetable.xml?'
     api_str = get_api_str(interval=interval, line=line, direction=terminus, freighttrain=False)
 
@@ -91,8 +93,9 @@ def update_func():
 
 
 def parse_xml_tree(root: ET.Element, api_str:str, display:str):
-    #operator_dict = defaultdict('Ukjent')
+
     operator_dict = {'VY': 'VY', 'SJN': 'SJNord', 'GAG': 'GoAhead', 'VYG': 'VYGjøvikb.', 'FLY': 'Flytoget', 'VYT':'VY'}
+
     # tidspunkt hentet ut, 
     #'Nr', 'Linje', 'Fra', 'Til', 'Med', 'Forrige stasjon', 'Kl', 'Neste stasjon', 'Kl', 'Forsinkelse', 'Merknad']
     # ingen godstog
@@ -222,10 +225,14 @@ def parse_xml_tree(root: ET.Element, api_str:str, display:str):
             
             if time_interval > 120:
                 continue
-    
+
+            if operator not in operator_dict.keys():
+                operator='Ukjent'
+            else:
+                operator=operator_dict[operator]
             single_journey = {
                 'Linje':line, 'Fra':origin, 'Til':destination, 
-                'Operatør': operator_dict[operator], 'Neste stasjon':next_stop, 'Estimert': arrival, 'Avvik': delay, 'Merknad':remark
+                'Operatør': operator, 'Neste stasjon':next_stop, 'Estimert': arrival, 'Avvik': delay, 'Merknad':remark
                 }      
             journey_count += 1
             all_journeys.append(single_journey)
