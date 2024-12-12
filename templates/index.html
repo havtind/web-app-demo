@@ -1,0 +1,80 @@
+
+{% extends 'base.html' %}
+
+
+{% block input_parameters %} 
+  <div class="parameter_grid">
+    <div class="line_grid">
+      Linje 
+    </div>
+    <div class="line_grid_value">
+      <select id="line"></select>
+    </div>
+    <div class="terminus_grid">
+      Endestasjon
+    </div>
+    <div class="terminus_grid_value">
+      <select id="terminus"></select>
+    </div>
+
+  </div>
+  <form hidden>
+        <input type="radio" id="liten_tab" name="visningsvalg" value="liten" checked="checked">
+        <label for="liten_tab">Liten tabell</label><br>
+        <input type="radio" id="stor_tab" name="visningsvalg" value="stor">
+        <label for="stor_tab">Stor tabell</label><br>
+  </form> 
+{% endblock %}
+
+
+{% block statistics %} 
+<div class="stat_grid">
+
+  <div class="last_update_grid">
+    Sist oppdatert 
+  </div>
+  <div class="last_update_grid_value">
+    <span id="demo"> - </span>
+  </div>
+
+  <div class="trains_grid">
+    Antall tog 
+  </div>
+  <div class="trains_grid_value">
+    <span id="trains"> - </span>
+  </div>
+
+  <div class="delays_grid">
+    Antall forsinkelser  
+  </div>
+  <div class="delays_grid_value">
+    <span id="delays"> - </span>
+  </div>
+
+</div>
+
+
+
+  
+  
+  
+
+{% endblock %}
+
+
+
+{% block train_clock %}
+  <div class="demo-container clocks single">
+    <article class="clock station show linear bounce">
+        <div class="hours-container" id="hours-container">
+            <div class="hours"></div>
+        </div>
+        <div class="minutes-container" id="minutes-container">
+            <div class="minutes"></div>
+        </div>
+        <div class="seconds-container" id="seconds-container">
+            <div class="seconds"></div>
+        </div>
+    </article>
+  </div>
+{% endblock %}

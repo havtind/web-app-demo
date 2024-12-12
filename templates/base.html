@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title> Togstatus i Norge </title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/tog_3.png') }}"/>
+    <script src="{{ url_for('static', filename='js/script.js') }}"> </script>
+
+</head>
+<body>
+    <div class="grid_layout">
+            <div class="box1">
+                <h1>Togstatus i Norge</h1>
+            </div>
+    
+            <div class="box2">
+                {% block statistics %} {% endblock %}
+                
+            </div>
+        
+            <div class="box3">
+                {% block train_clock %} {% endblock %}
+            </div>
+        
+            <div class="box4">
+                {% block input_parameters %} {% endblock %}
+            </div>
+
+            <div class="box5">
+                <div> <a id=updateButton class="button">Oppdater</a> </div>
+            </div>
+
+            <div class="box6">
+                <table id="test_table">
+                </table>
+            </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,7 @@
+myvenv
+.DS_Store
+.gcloudignore
+plan.txt
+__pycache__/
+lines.txt
+terminus.txt
